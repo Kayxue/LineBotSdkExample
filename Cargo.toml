@@ -1,0 +1,8 @@
+[workspace]
+resolver = "2"
+members = [
+    "actix-example",
+    "rocket-example",
+    "ntex-example"
+, "xitca-example"]
+
