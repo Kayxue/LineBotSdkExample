@@ -5,7 +5,7 @@ use line_bot_sdk_rust::{
         apis::MessagingApiApi,
         models::{Message, ReplyMessageRequest, TextMessage},
     },
-    line_webhook::models::{CallbackRequest, Event, MessageContent, event},
+    line_webhook::models::{CallbackRequest, Event, MessageContent},
     parser::signature::validate_signature,
     support::{
         XitcaError::{BadRequest, InternalServerError},
@@ -34,7 +34,7 @@ async fn callback(signature: Signature<'_>, bytes: Bytes) -> Result<&'static str
         return Err(BadRequest::new("Invalid signature").into());
     }
 
-    let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_str(&body);
+    let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_slice(&bytes);
     if let Ok(request) = request {
         for event in request.events {
             if let Event::MessageEvent(messageEvent) = event {

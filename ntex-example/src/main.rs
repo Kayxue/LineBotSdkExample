@@ -45,7 +45,7 @@ async fn callback(
     if !validate_signature(secret, &signature.key, &body) {
         return Err(ErrorBadRequest("Invalid signature"));
     }
-    let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_str(&body);
+    let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_slice(&bytes);
     if let Ok(request) = request {
         for event in request.events {
             if let Event::MessageEvent(messageEvent) = event {
