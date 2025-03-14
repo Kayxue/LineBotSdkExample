@@ -1,3 +1,4 @@
+use dotenv::dotenv;
 use line_bot_sdk_rust::{
     client::LINE,
     line_messaging_api::{
@@ -10,13 +11,14 @@ use line_bot_sdk_rust::{
 };
 use ntex::{
     main,
-    util::{Buf, Bytes},
+    util::Bytes,
     web::{
-        error::{ErrorBadRequest, ErrorInternalServerError}, post, App, HttpServer, Responder, WebResponseError
+        App, HttpServer, Responder, WebResponseError,
+        error::{ErrorBadRequest, ErrorInternalServerError},
+        post,
     },
 };
-use dotenv::dotenv;
-use std::{env, io::Read};
+use std::env;
 
 #[post("/callback")]
 async fn callback(
