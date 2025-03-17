@@ -1,5 +1,5 @@
 use actix_web::{
-    error::ErrorBadRequest, middleware, post, web, App, Error, HttpResponse, HttpServer,
+    App, Error, HttpResponse, HttpServer, error::ErrorBadRequest, middleware, post, web,
 };
 use dotenv::dotenv;
 use line_bot_sdk_rust::{
@@ -8,9 +8,9 @@ use line_bot_sdk_rust::{
         apis::MessagingApiApi,
         models::{Message, ReplyMessageRequest, TextMessage},
     },
+    line_webhook::models::{CallbackRequest, Event, MessageContent},
     parser::signature::validate_signature,
     support::actix::Signature,
-    line_webhook::models::{CallbackRequest, Event, MessageContent},
 };
 use std::env;
 
@@ -18,9 +18,9 @@ use std::env;
 async fn callback(signature: Signature, bytes: web::Bytes) -> Result<HttpResponse, Error> {
     // Get channel secret and access token by environment variable
     let channel_secret: &str =
-        &env::var("LINE_CHANNEL_SECRET").expect("Failed to get LINE_CHANNEL_SECRET");
+        &env::var("CHANNELSECRET").expect("Failed to get LINE_CHANNEL_SECRET");
     let access_token: &str =
-        &env::var("LINE_CHANNEL_ACCESS_TOKEN").expect("Failed to get LINE_CHANNEL_ACCESS_TOKEN");
+        &env::var("ACCESSTOKEN").expect("Failed to get LINE_CHANNEL_ACCESS_TOKEN");
 
     let line = LINE::new(access_token.to_string());
 
@@ -30,7 +30,7 @@ async fn callback(signature: Signature, bytes: web::Bytes) -> Result<HttpRespons
         return Err(ErrorBadRequest("x-line-signature is invalid."));
     }
 
-    let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_str(&body);
+    let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_slice(&bytes);
     match request {
         Err(err) => return Err(ErrorBadRequest(err.to_string())),
         Ok(req) => {
@@ -41,7 +41,10 @@ async fn callback(signature: Signature, bytes: web::Bytes) -> Result<HttpRespons
                     {
                         let reply_message_request = ReplyMessageRequest {
                             reply_token: message_event.reply_token.unwrap(),
-                            messages: vec![Message::TextMessage(TextMessage{text:text_message.text,..Default::default()})],
+                            messages: vec![Message::TextMessage(TextMessage {
+                                text: text_message.text,
+                                ..Default::default()
+                            })],
                             notification_disabled: Some(false),
                         };
                         let result = line
@@ -69,7 +72,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .service(callback)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 3000))?
     .run()
     .await
 }
