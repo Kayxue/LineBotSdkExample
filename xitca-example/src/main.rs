@@ -1,17 +1,17 @@
-use dotenv::dotenv;
-use line_bot_sdk_rust::{
+use bot_sdk_line::{
     client::LINE,
-    line_messaging_api::{
+    messaging_api_line::{
         apis::MessagingApiApi,
         models::{Message, ReplyMessageRequest, TextMessage},
     },
-    line_webhook::models::{CallbackRequest, Event, MessageContent},
     parser::signature::validate_signature,
     support::{
         XitcaError::{BadRequest, InternalServerError},
         xitca::Signature,
     },
+    webhook_line::models::{CallbackRequest, Event, MessageContent},
 };
+use dotenv::dotenv;
 use std::env;
 use xitca_web::{App, bytes::Bytes, codegen::route, error::Error};
 
