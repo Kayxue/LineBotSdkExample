@@ -59,9 +59,10 @@ async fn callback(Signature(key): Signature, bytes: Bytes) -> impl IntoResponse 
                 }
             }
         }
-        return (StatusCode::OK, "OK")
+        (StatusCode::OK, "OK")
+    } else {
+        (StatusCode::BAD_REQUEST, "Body parsing failed")
     }
-    (StatusCode::BAD_REQUEST, "Body parsing failed")
 }
 
 #[main]
