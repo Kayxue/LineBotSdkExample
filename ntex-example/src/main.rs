@@ -48,10 +48,10 @@ async fn callback(
     let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_slice(&bytes);
     if let Ok(request) = request {
         for event in request.events {
-            if let Event::MessageEvent(messageEvent) = event {
-                if let MessageContent::TextMessageContent(text_message) = *messageEvent.message {
+            if let Event::MessageEvent(message_event) = event {
+                if let MessageContent::TextMessageContent(text_message) = *message_event.message {
                     let reply_message_request = ReplyMessageRequest {
-                        reply_token: messageEvent.reply_token.unwrap(),
+                        reply_token: message_event.reply_token.unwrap(),
                         messages: vec![Message::TextMessage(TextMessage {
                             text: text_message.text,
                             ..Default::default()
