@@ -31,40 +31,37 @@ async fn callback(Signature(key): Signature, bytes: Bytes) -> impl IntoResponse 
     }
 
     let request: Result<CallbackRequest, serde_json::Error> = serde_json::from_slice(&bytes);
-    match request {
-        Err(_) => return (StatusCode::BAD_REQUEST, "Body parsing failed"),
-        Ok(req) => {
-            println!("req: {req:#?}");
-            for e in req.events {
-                if let Event::MessageEvent(message_event) = e {
-                    if let MessageContent::TextMessageContent(text_message) = *message_event.message
-                    {
-                        let reply_message_request = ReplyMessageRequest {
-                            reply_token: message_event.reply_token.unwrap(),
-                            messages: vec![Message::TextMessage(TextMessage {
-                                text: text_message.text,
-                                ..Default::default()
-                            })],
-                            notification_disabled: Some(false),
-                        };
-                        let result = line
-                            .messaging_api_client
-                            .reply_message(reply_message_request)
-                            .await;
-                        match result {
-                            Ok(r) => {
-                                println!("{:#?}", r);
-                            }
-                            Err(e) => {
-                                println!("{:#?}", e);
-                            }
+    if let Ok(req) = request {
+        println!("req: {req:#?}");
+        for e in req.events {
+            if let Event::MessageEvent(message_event) = e {
+                if let MessageContent::TextMessageContent(text_message) = *message_event.message {
+                    let reply_message_request = ReplyMessageRequest {
+                        reply_token: message_event.reply_token.unwrap(),
+                        messages: vec![Message::TextMessage(TextMessage {
+                            text: text_message.text,
+                            ..Default::default()
+                        })],
+                        notification_disabled: Some(false),
+                    };
+                    let result = line
+                        .messaging_api_client
+                        .reply_message(reply_message_request)
+                        .await;
+                    match result {
+                        Ok(r) => {
+                            println!("{:#?}", r);
+                        }
+                        Err(e) => {
+                            println!("{:#?}", e);
                         }
                     }
                 }
             }
-            (StatusCode::OK, "OK")
         }
+        return (StatusCode::OK, "OK")
     }
+    (StatusCode::BAD_REQUEST, "Body parsing failed")
 }
 
 #[main]
